@@ -1,0 +1,49 @@
+# Dimensoes da malha
+-10.d3 10.d3                       # xi xf
+0.d0 10.d3                         # zi zf
+
+# Resistividade do background
+100.d0
+
+# Quantidade, resistividade e coordenadas dos corpos
+1 500.d0         # Numero de corpos e fator para refinamento. 
+ 5.d0            # resistividade
+-0.5d3  5.d2     # xi, zi
+ 0.5d3  2.5d3    # xf, zf
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Dimensoes da malha
+-20.d3 20.d3                     # xi xf
+0.d0 20.d3                       # zi zf
+
+# Resistividade do background
+100.d0
+
+# Quantidade, resistividade e coordenadas dos corpos
+1 500.d0         # Numero de corpos e fator para refinamento. 
+ 5.d0            # resistividade
+-0.5d3  5.d2     # xi, zi
+ 0.5d3  2.5d3    # xf, zf
