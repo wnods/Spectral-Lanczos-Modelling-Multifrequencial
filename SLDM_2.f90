@@ -1,4 +1,4 @@
-PROGRAM SDLM_last
+PROGRAM SDLM_2
   !======================================================================================================
   ! Programa para calculo do Spectral Decomposition Lanczos Method
   ! programado para o discretizador de diferenças finitas
@@ -727,5 +727,5 @@ END SUBROUTINE MATMAT2
   END SUBROUTINE SAXPY2
 
   
-END PROGRAM SDLM_last
+END PROGRAM SDLM_2
 
