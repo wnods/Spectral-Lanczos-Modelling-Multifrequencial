@@ -2,7 +2,6 @@ PROGRAM SDLM_2
   !======================================================================================================
   ! Programa para calculo do Spectral Decomposition Lanczos Method
   ! programado para o discretizador de diferenças finitas
-  !Ellen Gomes
   ! 28/11/2019
   ! 16/12/2019
   ! 24/12/2019
