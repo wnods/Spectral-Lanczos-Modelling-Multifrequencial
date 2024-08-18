@@ -1,16 +1,4 @@
-PROGRAM SDLM_last
-  !======================================================================================================
-  ! Programa para calculo do Spectral Decomposition Lanczos Method
-  ! programado para o discretizador de diferenças finitas
-  !Ellen Gomes
-  ! 28/11/2019
-  ! 16/12/2019
-  ! 24/12/2019
-  ! Os testes no Matlab indicam que a matriz A é simetrica!!!!! 
-  !27/12/2019
-  !28/12/2019
-  ! 07/01/2020
-  !=====================================================================================================
+PROGRAM SDLM
   
 
   IMPLICIT NONE
@@ -771,5 +759,5 @@ END SUBROUTINE MATMAT
   END SUBROUTINE SAXPY2
 
   
-END PROGRAM SDLM_last
+END PROGRAM SDLM
 
