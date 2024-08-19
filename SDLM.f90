@@ -266,6 +266,8 @@ PROGRAM SDLM_last
 
   eig = alpha_tmp
 
+  ! Atualização nas linhas de 271 até 291: mudança de leitura e exclusão da função PAUSE, evitando redundâncias.
+
   WRITE(*, *) 'Cálculo dos autovalores --OK'
   WRITE(*, *) 'Razão', MINVAL(eig) / MAXVAL(eig)
   OPEN(71, FILE = 'autovalores.dat')
