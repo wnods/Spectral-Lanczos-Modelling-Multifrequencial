@@ -20,7 +20,7 @@ PROGRAM SDLM
   CALL CPU_TIME(time_begin)
 
 
-  imag=(0.d0,1.d0);  !i imaginario puro
+  imag=(0.d0,1.d0, KIND=8);  !i imaginario puro
 
 !==================================================
 !Entrada da matriz
@@ -28,41 +28,41 @@ PROGRAM SDLM
  write(*,*)'Entre com a opcao para a matriz: calculada(1), lida de de arquivo(2), matrizes de EM (3)'
  read(*,*)opt
 
-if (opt==1)then
-	nlin = 10
-	ncol = 10
+elseif(opt==1)then
+    ! Set dimensions for the matrix
+    nlin = 10
+    ncol = 10
 
- ALLOCATE(MatA(nlin,ncol),STAT=ierr)
-  IF(ierr)THEN
-  STOP 'Nao foi possivel allocar memoria para MatA'
-  END IF
+    ! Allocate memory for MatA
+    ALLOCATE(MatA(nlin, ncol), STAT=ierr)
+    IF (ierr /= 0) THEN
+        STOP 'Nao foi possivel allocar memoria para MatA'
+    END IF
 
-	MatA = 0;
-	do j=1,nlin
-		MatA(j,j) = 0.01*j
-	end do
-		MatA(10,10) = 1000
+    ! Initialize MatA as a diagonal matrix with incrementing values
+    MatA = 0.0d0
+    DO j = 1, nlin
+        MatA(j, j) = 0.01 * j
+    END DO
+    MatA(10, 10) = 1000.0d0  ! Set a large value at the bottom right
+
+    ! You can add more logic here as required by your program
+    
 elseif(opt==2)then
 	write(*,*)'Entre com o nome do arquivo da matriz'
 	read(*,*)fname7
 	open(111, FILE=fname7,status ='old')
  	read(111,*)nlin,ncol
-  
 
   ALLOCATE(MatA(nlin,ncol),STAT=ierr)
   IF(ierr)THEN
-  STOP 'Nao foi possivel allocar memoria para MatA'
-  END IF
-
-
-  ALLOCATE(MatA(nlin,ncol),STAT=ierr)
-  IF(ierr)THEN
-  STOP 'Nao foi possivel allocar memoria para MatA'
+    STOP 'Nao foi possivel allocar memoria para MatA'
   END IF
 
   do j1=1,nlin
-  read(111,*)(MatA(j1,j2),j2=1,ncol)
+    read(111,*)(MatA(j1,j2),j2=1,ncol)
   end do
+
  
 
 elseif(opt==3)then
