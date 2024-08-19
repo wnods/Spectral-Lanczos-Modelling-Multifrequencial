@@ -1,4 +1,24 @@
 PROGRAM SDLM_last
+
+  !======================================================================================================
+  ! Programa para calculo do Spectral Decomposition Lanczos Method
+  ! Programado para o discretizador de diferenças finitas
+  ! 28/11/2019
+  ! 16/12/2019
+  ! 24/12/2019
+  ! Os testes no Matlab indicam que a matriz A é simetrica!!!!! 
+  ! 27/12/2019
+  ! 28/12/2019
+  ! 07/01/2020
+  ! 15/01/2020
+  ! 20/01/2020 Tentativa de separação da contribuicao da fonte no vetor B
+  !27/01/2020 Otimização
+  !11/02/2020 numero de iteracoes do alg de lanczos
+  !01/04/2020 Versao do prgrama que roda os dados so anderson. Esta versão não esta otimizada
+  !10/12/2020 Ultima atualização
+  ! 19/08/2024 Mudança de compilador de "ifort" para "gfortran e mudanças de syntax e strings de alocação de memmória
+  ! 19/08/2024 Ultima atualização
+
   IMPLICIT NONE
   
   ! Definição de constantes e variáveis
