@@ -178,7 +178,7 @@ PROGRAM SDLM_last
       Diag_inv(j1, j1) = 1.d0 / SQRT(Diag(j1, j1))
       IF (Diag(j1, j1) == 0.d0) THEN
           WRITE(*, *) j1, Diag_inv(j1, j1)
-          PAUSE
+          
       END IF
       VecB(j1) = Diag_inv(j1, j1) * Source_Vec(j1)
   END DO
@@ -191,7 +191,7 @@ PROGRAM SDLM_last
 
   mod_VecB = SQRT(DOT_PRODUCT(VecB, VecB))
   WRITE(*, *) 'mod', mod_VecB
-  PAUSE
+  
   V(:, 1) = VecB / mod_VecB
 
   ! Recursão de Lanczos
