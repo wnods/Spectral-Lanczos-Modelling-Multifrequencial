@@ -1,23 +1,42 @@
-PROGRAM SDLM_last
+PROGRAM SDLM
+  !======================================================================================================
+  ! Programa para calculo do Spectral Decomposition Lanczos Method
+  ! programado para o discretizador de diferenças finitas
+  !Ellen Gomes
+  ! 28/11/2019
+  ! 16/12/2019
+  ! 24/12/2019
+  ! Os testes no Matlab indicam que a matriz A é simetrica!!!!! 
+  !27/12/2019
+  !28/12/2019
+  ! 07/01/2020
+  !15/01/2020
+  !20/01/2020 Tentativa de separação da contribuicao da fonte no vetor B
+  !27/01/2020 Otimização
+  !11/02/2020 numero de iteracoes do alg de lanczos
+  !20/08/2024 mudança de 'ifort' executável para 'ifx' 
+  !20/08/2024 há erros no openfile do arquivo Stiff.dat - FIX BUG (X)
+  !=====================================================================================================
   IMPLICIT NONE
-  REAL(8), PARAMETER :: PI = 3.141592653589793238462643383279502884197d0
-  REAL(8), ALLOCATABLE :: Stiff_Mat(:,:), Diag(:,:), Mass_Mat(:,:), Imat(:,:), MatA(:,:), Diag_inv(:,:), Hess_Mat(:,:)
-  COMPLEX(8), ALLOCATABLE :: V(:,:), Mat_temp(:,:), eig_vec_transp(:,:), Mat_eig(:,:), Inv_Mat_eig(:,:), &
-                              Conj_Mat_eig(:,:), Mat_source(:,:), Mat_1(:,:), Mat_2(:,:), Mat_3(:,:)
-  REAL(8), ALLOCATABLE :: Source_Vec_real(:), Source_Vec_imag(:), mod_Mat_eig(:), vec_e(:)
-  REAL(8), ALLOCATABLE :: alpha(:), alpha_tmp(:), beta(:), beta_tmp(:)
-  REAL(4), ALLOCATABLE :: eig(:)
-  COMPLEX(16), ALLOCATABLE :: Source_Vec(:), VecB(:), Vec_temp(:), Vec_res(:), V_0(:), vec_1(:), field(:)
-  COMPLEX(16) :: imag, t1, t2, t3
-  REAL(8) :: freq, beta_0, mod_VecB, sum_VecB, eig_0, omega, ni, mod_field
-  INTEGER :: nlin, niter, ntemp, ncol, ierr, j, j1, j2, k1, k2, k3, k4, k10, right_index, k, left_index, opt
-  COMPLEX(16), ALLOCATABLE :: eig_vec(:,:)
+  REAL(8),PARAMETER:: PI      = 3.141592653589793238462643383279502884197d0
+  REAL(8),ALLOCATABLE,DIMENSION(:,:):: Stiff_Mat, Diag, Mass_Mat,Imat, MatA,Diag_inv,Hess_Mat
+  COMPLEX(8),ALLOCATABLE,DIMENSION(:,:):: V, Mat_temp,eig_vec,eig_vec_transp,Mat_eig,Inv_Mat_eig,Conj_Mat_eig,Mat_source,&
+                                          Mat_1,Mat_2,Mat_3
+  REAL(8),ALLOCATABLE,DIMENSION(:)::Source_Vec_real, Source_Vec_imag, mod_Mat_eig,vec_e
+  REAL(8),ALLOCATABLE,DIMENSION(:)::alpha,alpha_tmp,beta, beta_tmp
+  REAL(4),ALLOCATABLE,DIMENSION(:)::eig
+  COMPLEX*16,ALLOCATABLE,DIMENSION(:)::Source_Vec, VecB , Vec_temp, Vec_res,V_0,vec_1,field
+  COMPLEX(8)::imag, t1, t2,t3
+  REAL(8):: freq,beta_0,mod_VecB,sum_VecB,eig_0,omega,ni,mod_field
+  INTEGER(4)::nlin,niter,ntemp,ncol,ierr,j,j1,j2,k1,k2,k3,k4,k10,right_index,k,left_index,opt
 
-  CHARACTER(64) :: fname, fname1, fname2, fname3, fname4, fname5, fname6, fname7, fname8, fname9, fname10, fname11
-  REAL :: time_begin, time_end
+  CHARACTER*64::fname,fname1, fname2, fname3, fname4,fname5,fname6,fname7,fname8,fname9,fname10,fname11
+  REAL time_begin, time_end
 
-  CALL CPU_TIME(time_begin)
-  imag = CMPLX(0.d0, 1.d0, KIND=8)
+
+ CALL CPU_TIME(time_begin)
+
+ imag=(0.d0,1.d0);  !i imaginario puro
 
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -29,12 +48,15 @@ PROGRAM SDLM_last
 !MAT Stiffness
 !write(*,*)'Entre com a dimensão das matrizes de Stiffness e Mass'
 !read(*,*)
-
 nlin=1521
 ncol=nlin
 
-ALLOCATE(Stiff_Mat(nlin, ncol), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para Stiff_Mat'
+
+  ALLOCATE(Stiff_Mat(nlin,ncol),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para Stiff_Mat'
+  END IF
+
 
 	!write(*,*)'Entre com arquivo da parte real da matriz de Stiffness'
 	!read(*,*) 
@@ -42,8 +64,9 @@ ALLOCATE(Stiff_Mat(nlin, ncol), STAT=ierr)
 
 	!write(*,*)'Entre com arquivo da parte imaginaria da matriz de Stiffness'
 	!read(*,*) 
-  open(10, DEFAULTFILE='~/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_Anderson/Campos_8281/matrizes', FILE=fname1,status ='old')
- !open(10,FILE=fname1,status ='old')
+
+ open(10, DEFAULTFILE='~/home/ellen/Área de Trabalho/R-D/Ellen_backup_ubuntu/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_Anderson/Campos_8281/matrizes/', FILE=fname1,status ='old')
+! open(10,FILE=fname1,status ='old')
   	
  do j1=1,nlin
     read(10,*)Stiff_Mat(j1,:)  
@@ -56,13 +79,15 @@ fname3 =  'Mass.dat'!'real_Mass10.dat' !'matT_real.dat'
  ! write(*,*)'Entre com arquivo da parte imaginaria da matriz de Massa'
  ! read(*,*) 
 
-open(11, DEFAULTFILE='~/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_Anderson/Campos_8281/matrizes', FILE=fname3,status ='old')
+open(11, DEFAULTFILE='~/home/ellen/Área de Trabalho/R-D/Ellen_backup_ubuntu/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_Anderson/Campos_8281/matrizes/', FILE=fname3,status ='old')
 !open(11,FILE=fname3,status ='old')
 
-ALLOCATE(Mass_Mat(nlin, ncol), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para Mass_Mat'
 
-
+  ALLOCATE(Mass_Mat(nlin,ncol),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para Mass_Mat'
+  END IF
+   
   do j1=1,nlin
         read(11,*)Mass_Mat(j1,:)  
   end do
@@ -86,28 +111,32 @@ fname6 = 'imagB100.dat'
 
 
 
-open(15, DEFAULTFILE='~/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_Anderson/Campos_8281/100Hz', FILE=fname5,status ='old')
+open(15, DEFAULTFILE='~/home/ellen/Área de Trabalho/R-D/Ellen_backup_ubuntu/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_Anderson/Campos_8281/100Hz', FILE=fname5,status ='old')
 !open(15, FILE=fname5,status ='old')
 
-open(25, DEFAULTFILE='~/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_Anderson/Campos_8281/100Hz', FILE=fname6,status ='old')
+open(25, DEFAULTFILE='~/home/ellen/Área de Trabalho/R-D/Ellen_backup_ubuntu/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_Anderson/Campos_8281/100Hz', FILE=fname6,status ='old')
 !open(25, FILE=fname6,status ='old')
    
 
- ALLOCATE(Source_Vec_real(nlin), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para Source_Vec_real'
+  ALLOCATE(Source_Vec_real(nlin),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para Source_Vec_real'
+  END IF
 
-  ALLOCATE(Source_Vec_imag(nlin), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para Source_Vec_imag'
-  
+  ALLOCATE(Source_Vec_imag(nlin),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para Source_Vec_imag'
+  END IF
 
    do j1=1,nlin
         read(15,*)Source_Vec_real(j1)
         read(25,*)Source_Vec_imag(j1)    
    end do
 
-  ALLOCATE(Source_Vec_real(nlin), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para Source_Vec_real'
- 
+  ALLOCATE(Source_Vec(nlin),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para Source_Vec'
+  END IF
 
    Source_Vec = Source_Vec_real + imag*Source_Vec_imag
 
@@ -117,20 +146,35 @@ open(25, DEFAULTFILE='~/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 !Preparacao do sistema para uso na recurssao de Lanczos
- ALLOCATE(Diag(nlin, nlin), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para Diag'
-  
-  ALLOCATE(Diag_inv(nlin, nlin), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para Diag_inv'
-  
-  ALLOCATE(VecB(nlin), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para VecB'
-  
-  ALLOCATE(Imat(nlin, ncol), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para Imat'
-  
-  ALLOCATE(MatA(nlin, ncol), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para MatA'
+  ALLOCATE(Diag(nlin,nlin),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para Diag'
+  END IF
+
+
+  ALLOCATE(Diag_inv(nlin,nlin),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para Diag_inv'
+  END IF
+
+  ALLOCATE(VecB(nlin),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para VecB'
+  END IF
+
+
+  ALLOCATE(Imat(nlin,ncol),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para Imat'
+  END IF
+
+
+  ALLOCATE(MatA(nlin,ncol),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para MatA'
+  END IF
+
+
 
 !-----------------------------------------------------------------------
 !Alocação de memório para a recurssão de Laczos
@@ -141,34 +185,55 @@ open(25, DEFAULTFILE='~/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_
 !Hess_Mat, produto da recurssao, dim=niterxniter;
 !-----------------------------------------------------------------------
 
-   niter=nlin !503 !numero de iterações calculado do nuremo de autovetores nao iguais (diferença entre eles <0.0001)
+   niter=nlin !503 !numero de iterações calculado do nuremo de autovetores nao iguais (difereca entre eles <0.0001)
+
+
 
   ALLOCATE(V(nlin,niter),STAT=ierr)
-  IF(ierr /= 0) STOP 'Nao foi possiveç allocar memoria para V'
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para V'
+  END IF
 
   
-  ALLOCATE(V_0(nlin), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para V_0'
+  ALLOCATE(V_0(nlin),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para VecB'
+  END IF
 
   
-  ALLOCATE(Vec_temp(nlin), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para Vec_temp'
-  
-  ALLOCATE(Mat_temp(nlin, nlin), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para Mat_temp'
-  
-  ALLOCATE(alpha(niter), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para alpha'
+  ALLOCATE(Vec_temp(nlin),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para VecB'
+  END IF
 
-  AALLOCATE(beta(niter), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para beta'
-  
-  ALLOCATE(Vec_res(nlin), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para Vec_res'
-  
-  ALLOCATE(Hess_Mat(niter, niter), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para Hess_Mat'
 
+  ALLOCATE(Mat_temp(nlin,nlin),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para Mat_temp'
+  END IF
+
+
+  ALLOCATE(alpha(niter),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para alpha'
+  END IF
+
+  ALLOCATE(beta(niter),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para beta'
+  END IF
+
+
+  ALLOCATE(Vec_res(nlin),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para VecB'
+  END IF
+
+
+  ALLOCATE(Hess_Mat(niter,niter),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para Hess_Mat'
+  END IF
 !-----------------------------------------------------------------------
 !Calculo dos autovalores da Hessiana
 !alpha_temp, beta_temp varlores de alpha e beta a serem usados no calculo dos autovalores; 
@@ -184,60 +249,49 @@ open(25, DEFAULTFILE='~/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_
 
   ntemp=niter-1
 
-  A  ALLOCATE(alpha_tmp(niter), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para alpha_tmp'
-  
-  ALLOCATE(beta_tmp(ntemp), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para beta_tmp'
-  
-  ALLOCATE(eig_vec(niter, niter), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para eig_vec'
-  
-  ALLOCATE(eig(niter), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para eig'
-  
-  ALLOCATE(Mat_eig(niter, niter), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para Mat_eig'
-  
-  ALLOCATE(mod_Mat_eig(niter), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para mod_Mat_eig'
-  
-  ALLOCATE(Conj_Mat_eig(niter, niter), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para Conj_Mat_eig'
-  
-  ALLOCATE(Inv_Mat_eig(niter, niter), STAT=ierr)
-  IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para Inv_Mat_eig'
-  
-!-----------------------------------------------------------------------
-! Outras allocate de memoria para transpostas e Mat_1,2,3. Vec_e e Vec_1
-! Mat_1 matriz usada no calculo de matrizes, dim=nlinxniter;
-! Mat_2 matriz usada no calculo de matrizes, dim=nlinxniter;
-! Mat_3 matriz usada no calculo de matrizes, dim=nlinxniter;
-! vec_e vetor usado no calculo, dim = niter;
-! Vec_1 vetor usado no calculo;
-!-----------------------------------------------------------------------
+  ALLOCATE(alpha_tmp(niter))
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para alpha_tmp'
+  END IF
 
- !ALLOCATE(eig_vec_transp(niter, niter), STAT=ierr)
-  !IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para eig_vec_transp'
-  
-  !ALLOCATE(Mat_1(nlin, niter), STAT=ierr)
-  !IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para Mat_1'
-  
-  !ALLOCATE(Mat_2(nlin, niter), STAT=ierr)
-  !IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para Mat_2'
-  
-  !ALLOCATE(Mat_3(nlin, niter), STAT=ierr)
-  !IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para Mat_3'
-  
-  !ALLOCATE(vec_e(niter), STAT=ierr)
-  !IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para vec_e'
-  
-  !ALLOCATE(field(nlin), STAT=ierr)
-  !IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para field'
-  
-  !ALLOCATE(vec_1(nlin), STAT=ierr)
-  !IF (ierr /= 0) STOP 'Nao foi possivel allocar memoria para vec_1'
+  Allocate(beta_tmp(ntemp))
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para beta_tmp'
+  END IF
 
+
+  ALLOCATE(eig_vec(niter,niter),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para eig_vec'
+  END IF
+
+
+  ALLOCATE(eig(niter),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para eig'
+  END IF
+
+
+  ALLOCATE(Mat_eig(niter,niter),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para Mat_eig'
+  END IF
+
+  ALLOCATE(mod_Mat_eig(niter),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para mod_Mat_eig'
+  END IF
+
+  ALLOCATE(Conj_Mat_eig(niter,niter),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para Conj_Mat_eig'
+  END IF
+
+  ALLOCATE(Inv_Mat_eig(niter,niter),STAT=ierr)
+  IF(ierr)THEN
+  STOP 'Nao foi possivel allocar memoria para Inv_Mat_eig'
+  END IF
+  
 !-----------------------------------------------------------------------
 !Variáveis envolvidas no calculo da decomposição espectral de Lanczos
 ! eig_vec_transp transposta da matriz eig_vec, dim = niterxniter;
@@ -274,7 +328,7 @@ open(25, DEFAULTFILE='~/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_
  		Diag_inv(j1,j1) = 1.d0/sqrt(Diag(j1,j1));  !D^-1/2
                    if(Diag(j1,j1)==0.d0)then
                     write(*,*) j1,Diag_inv(j1,j1)
-!pause
+pause
                end if
                 VecB(j1)= Diag_inv(j1,j1)*Source_Vec(j1);
 	end do
@@ -291,7 +345,7 @@ open(25, DEFAULTFILE='~/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_
 
 	mod_VecB = sqrt(dot_product(VecB,VecB));
          write(*,*)'mod',mod_VecB
-!pause
+pause
 	V(:,1) =  VecB/(mod_VecB);
 
 
@@ -301,7 +355,6 @@ stop
 !Recursao de lanczos
 !m=numero de iterações
 !=============================================
-
 k1=1;
 k2=0;
 k3=0;
@@ -377,6 +430,7 @@ write(*,*)'ultimo valor de beta',beta(j),j,k10
 
   alpha_tmp = alpha
   beta_tmp((/1:ntemp/))  = beta((/1:ntemp/))
+
 
 
  CALL eigenvalues_complex(alpha_tmp,beta_tmp,eig_vec,k10) !eig_vect autovec compl e alpha_mim autoval reias da mat tridiag
@@ -485,40 +539,33 @@ OPEN(47,DEFAULTFILE='~/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_A
 
  CALL CPU_TIME (time_end)
 
- write(*,*) 'Time of operation was ', 'time_end - time_begin', ' seconds'
+ write(*,*) 'Time of operation was ', time_end - time_begin, ' seconds'
 
- CONTAINS
 
-  SUBROUTINE eigenvalues_complex(d, u, eig_vec, n)
-    IMPLICIT NONE
-    INTEGER :: n, lgn
-    REAL(8), DIMENSION(n) :: d
-    REAL(8), DIMENSION(n - 1) :: u
-    COMPLEX(16), DIMENSION(:,:), ALLOCATABLE :: eig_vec
-    INTEGER :: LDZ
-    COMPLEX(16), DIMENSION(:), ALLOCATABLE :: WORK
-    INTEGER :: LWORK, LIWORK
-    REAL(8), DIMENSION(:), ALLOCATABLE :: RWORK
-    INTEGER, DIMENSION(:), ALLOCATABLE :: IWORK
-    INTEGER :: LRWORK, INFO
 
-    lgn = CEILING(LOG(REAL(n, KIND=8)) / LOG(2.0_8))
-    LDZ = n
 
-    ALLOCATE(WORK(1), IWORK(1), RWORK(1))
-    lwork = -1
-    lrwork = -1
-    liwork = -1
+CONTAINS
+SUBROUTINE eigenvalues_complex(d,u,eig_vec,n)
+   
+ !   Use nag_library, Only: nag_wp, x04dbf, zhbtrd, zstedc
+ implicit none
+    INTEGER, PARAMETER :: dp=KIND(0.d0)
+    CHARACTER :: COMPZ = 'I'                   !opcao I calcula os autovetores de H tambem
+    INTEGER :: n,lgn			       !dimensão da matriz tridiagonal
+    REAL(dp), dimension(n)::d                  !array with diagonal
+    REAL(dp), dimension(n - 1):: u             !E upper diagonal
+    COMPLEX*16,dimension(:,:), allocatable :: eig_vec !Z autovetores da mat tridiag
+    INTEGER::LDZ                                !=n dimension of the array Z
+    COMPLEX*16,dimension(:), allocatable :: WORK
+    INTEGER :: LWORK, LIWORK                  !assumir -1
+    REAL(dp), dimension(:), allocatable::RWORK
+  !  Real (Kind=nag_wp)               :: rdum(1)
+   ! Integer                          :: idum(1)
+    INTEGER, dimension(:), allocatable :: IWORK
+    INTEGER::LRWORK,INFO
 
-    ! Ajuste no código para chamadas de função intrínseca
-    lwork = MAX(n*n, NINT(REAL(WORK(1))))
-    lrwork = MAX(1+3*n+2*n*lgn+4*n*n, NINT(RWORK(1)))
-    liwork = MAX(6+6*n+5*n*lgn, IWORK(1))
 
-    DEALLOCATE(WORK, IWORK, RWORK)
-    ALLOCATE(WORK(lwork), RWORK(lrwork), IWORK(liwork))
-
-    lgn = ceiling(log(real(n,kind=dp))/log(2.0_dp))
+lgn = ceiling(log(real(n,kind=dp))/log(2.0_dp))
 LDZ = N
 
 
@@ -629,5 +676,5 @@ END SUBROUTINE MATMAT
   END SUBROUTINE SAXPY2
 
   
-END PROGRAM SDLM_last
+END PROGRAM SDLM
 
