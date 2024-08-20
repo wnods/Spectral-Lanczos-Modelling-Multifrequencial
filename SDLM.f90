@@ -2,7 +2,7 @@ PROGRAM SDLM
   !======================================================================================================
   ! Programa para calculo do Spectral Decomposition Lanczos Method
   ! programado para o discretizador de diferenças finitas
-  !Ellen Gomes
+  ! Ellen Gomes
   ! 28/11/2019
   ! 16/12/2019
   ! 24/12/2019
@@ -15,9 +15,10 @@ PROGRAM SDLM
   !27/01/2020 Otimização
   !11/02/2020 numero de iteracoes do alg de lanczos
   !20/08/2024 mudança de 'ifort' executável para 'ifx' 
-  !20/08/2024 há erros no openfile do arquivo Stiff.dat - FIX BUG (X)
+  !20/08/2024 há erros no openfile do arquivo Stiff.dat - FIXED (X)
+  !20/08/2024 RUN TEST AND WORKING
   !=====================================================================================================
-  IMPLICIT NONE
+   IMPLICIT NONE
   REAL(8),PARAMETER:: PI      = 3.141592653589793238462643383279502884197d0
   REAL(8),ALLOCATABLE,DIMENSION(:,:):: Stiff_Mat, Diag, Mass_Mat,Imat, MatA,Diag_inv,Hess_Mat
   COMPLEX(8),ALLOCATABLE,DIMENSION(:,:):: V, Mat_temp,eig_vec,eig_vec_transp,Mat_eig,Inv_Mat_eig,Conj_Mat_eig,Mat_source,&
@@ -51,6 +52,10 @@ PROGRAM SDLM
 nlin=1521
 ncol=nlin
 
+ ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% !
+ ! %%%%%%%%%%% MUDANÇA DE DIRETORIOS %%%%%%%%%%%%%%%%%% !
+ ! %%%%%%%%%%%  LINHAS 71, 85, 117, 120.   %%%%%%%%%%%% !
+ ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% !
 
   ALLOCATE(Stiff_Mat(nlin,ncol),STAT=ierr)
   IF(ierr)THEN
@@ -60,13 +65,14 @@ ncol=nlin
 
 	!write(*,*)'Entre com arquivo da parte real da matriz de Stiffness'
 	!read(*,*) 
+
   fname1 =  'Stiff.dat'!'real_Stiff10.dat' !'matC_real.dat' 
 
 	!write(*,*)'Entre com arquivo da parte imaginaria da matriz de Stiffness'
 	!read(*,*) 
 
- open(10, DEFAULTFILE='~/home/ellen/Área de Trabalho/R-D/Ellen_backup_ubuntu/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_Anderson/Campos_8281/matrizes/', FILE=fname1,status ='old')
-! open(10,FILE=fname1,status ='old')
+ open(10, DEFAULTFILE='~/Área de Trabalho/R-D/Ellen_backup_ubuntu/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_Anderson/Campos_8281/matrizes/', FILE=fname1,status ='old')
+ ! open(10,FILE=fname1,status ='old')
   	
  do j1=1,nlin
     read(10,*)Stiff_Mat(j1,:)  
@@ -79,7 +85,7 @@ fname3 =  'Mass.dat'!'real_Mass10.dat' !'matT_real.dat'
  ! write(*,*)'Entre com arquivo da parte imaginaria da matriz de Massa'
  ! read(*,*) 
 
-open(11, DEFAULTFILE='~/home/ellen/Área de Trabalho/R-D/Ellen_backup_ubuntu/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_Anderson/Campos_8281/matrizes/', FILE=fname3,status ='old')
+open(11, DEFAULTFILE='~/Área de Trabalho/R-D/Ellen_backup_ubuntu/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_Anderson/Campos_8281/matrizes/', FILE=fname3,status ='old')
 !open(11,FILE=fname3,status ='old')
 
 
@@ -111,10 +117,10 @@ fname6 = 'imagB100.dat'
 
 
 
-open(15, DEFAULTFILE='~/home/ellen/Área de Trabalho/R-D/Ellen_backup_ubuntu/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_Anderson/Campos_8281/100Hz', FILE=fname5,status ='old')
+open(15, DEFAULTFILE='~/Área de Trabalho/R-D/Ellen_backup_ubuntu/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_Anderson/Campos_8281/100Hz', FILE=fname5,status ='old')
 !open(15, FILE=fname5,status ='old')
 
-open(25, DEFAULTFILE='~/home/ellen/Área de Trabalho/R-D/Ellen_backup_ubuntu/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_Anderson/Campos_8281/100Hz', FILE=fname6,status ='old')
+open(25, DEFAULTFILE='~/Área de Trabalho/R-D/Ellen_backup_ubuntu/Área de Trabalho/PEROBA/estudo_19_04-19/Programs/Dados_Anderson/Campos_8281/100Hz', FILE=fname6,status ='old')
 !open(25, FILE=fname6,status ='old')
    
 
@@ -675,6 +681,9 @@ END SUBROUTINE MATMAT
 
   END SUBROUTINE SAXPY2
 
-  
-END PROGRAM SDLM
+  !  EXECUTAR COM O COMANDO ifx -o SDLM_last_V11 SDLM_last_V11.f90
+
+END PROGRAM SDLM_last
+
+
 
