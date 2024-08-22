@@ -1,0 +1,5 @@
+20000	Intervalo x
+10000	Intervalo z
+100      Numero de nos em x
+100  	Numero de nos em z
+
