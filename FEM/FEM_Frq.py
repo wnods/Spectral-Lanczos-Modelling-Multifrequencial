@@ -176,5 +176,26 @@ def parameters(i, j):
     else:
         delta_mi = 0.0
         delta_sigma = 0.0
-        rho_elemento = rho[nc - 0]
+        rho_elemento = rho[nc - 1]
+        mi_elemento = mi[nc - 1] * mi0
+
+       # results for each element
+        print(f'Element {i}:')
+        print(f'Hy: {Hy}')
+        print(f'Ex: {Ex}')
+        print(f'Delta mi: {delta_mi}')
+        print(f'Delta sigma: {delta_sigma}')
+        print(f'Rho elemento: {rho_elemento}')
+        print(f'Mi elemento: {mi_elemento}')
+
+
+def main():
+    get_data()
+    get_model()
+    grid_2d()
+    hetero_ident()
+    process_elements()
+
+if __name__ == "__main__":
+    main()
 
