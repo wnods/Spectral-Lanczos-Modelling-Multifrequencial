@@ -1,4 +1,5 @@
 import numpy as np
+import logging
 import cmath
 
 # Constants
@@ -23,7 +24,7 @@ nc = None
 #===================================================================================
 def get_data():
     global interv_x, interv_z, dx, dz, area_elem, nos, nos_x, nos_z, n_elements, sB
-    with open('data.txt', 'r') as file:
+    with open('/data.txt', 'r') as file:
         interv_x = dbl(file.readline())
         interv_z = dbl(file.readline())
         nos_x = int(file.readline())
@@ -231,7 +232,7 @@ def cc(Fonte, Global):
         Global[j, j] = 1.0 + 1.0j
 
 #===================================================================================
-def matGlobal(e, no, nE, sB, gl, nosE, matE):
+def GlobalMat(e, no, nE, sB, gl, nosE, matE):
     matG = np.zeros((sB, no), dtype=complex)
     for i in range(gl):
         k = nosE[e, i]
@@ -240,10 +241,10 @@ def matGlobal(e, no, nE, sB, gl, nosE, matE):
             if m < sB:
                 n = sB + k - m
                 matG[m, n] += matE[j, i]
-    return matG
+    return Gmat
 
 #===================================================================================
-def factorMatG(matG, nG, sB):
+def matGfactor(matG, nG, sB):
     for j in range(nG):
         q = max(0, j - nG + sB)
         for i in range(sB - 1, q - 1, -1):
@@ -259,7 +260,7 @@ def factorMatG(matG, nG, sB):
                 matG[i, k] = c
 
 #===================================================================================
-def solveMatGx(matG, nG, sB, vecG):
+def solve4MagX(matG, nG, sB, vecG):
     for j in range(nG):
         k = max(0, j - nG + sB)
         for m in range(sB - 1, k - 1, -1):
@@ -359,6 +360,7 @@ def plota_malha():
         for i in range(nos):
             f.write(" ".join(f"{coordenadas[i, j]:10.3f}" for j in range(2)) + "\n")
 
+
 def main():
     # Step 1: Get data
     get_data()
@@ -389,5 +391,20 @@ def main():
     print_result(Fonte)
     print("Results printed successfully.")
 
+    logging.basicConfig(level=logging.INFO)
+    logging.info("Starting the FEM simulation.")
+    fem_model = FiniteElementModel()
+    
+    fem_model.load_data()
+    logging.info("Data loaded successfully.")
+    
+    fem_model.generate_grid()
+    logging.info("Grid generated successfully.")
+
+    logging.info("Simulation completed.")
+
+
+
 if __name__ == "__main__":
     main()
+
